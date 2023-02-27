@@ -1,26 +1,25 @@
 # lts with jdk8, starting with 2.303 jdk11 is the default
-FROM jenkins/jenkins:2.332.1-lts-jdk11
+FROM jenkins/jenkins:2.375.3-lts-jdk11
 
 # https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
 ARG TARGETARCH
 ARG TARGETOS
 
 ENV VELERO_VERSION=1.7.0
+ENV HELM_VERSION=v3.10.3
+ENV KUBECTL_VERSION=v1.24.8
 
 # change user to root to install some tools
 USER root
 RUN apt-get update -y \
- && apt-get install python3-pip python3-venv libpq-dev jq libltdl7 netcat sshpass rsync python3-mysqldb -y \
- && apt-get clean -y
-RUN pip3 install awscli \
-    ansible==2.10.7 \
-    openshift==0.12.1 \
-    docker==5.0.0 \
-    ansible-modules-hashivault==4.2.3 \
-    dnspython==2.2.0 \
-    psycopg2==2.9.3
+    && apt-get install python3-pip python3-venv libpq-dev jq libltdl7 netcat sshpass rsync python3-mysqldb -y \
+    && apt-get clean -y
 
-RUN ansible-galaxy collection install kubernetes.core:==2.2.3
+COPY requirements.txt /tmp/requirements.txt
+
+RUN pip3 install -r /tmp/requirements.txt
+
+RUN ansible-galaxy collection install kubernetes.core:==2.2.3 ansible.utils:==2.7.0
 
 RUN curl -L https://github.com/mikefarah/yq/releases/download/3.3.2/yq_${TARGETOS}_${TARGETARCH} -o /usr/bin/yq && \
     chmod +x /usr/bin/yq
@@ -35,9 +34,19 @@ RUN curl -L https://github.com/vmware-tanzu/velero/releases/download/v${VELERO_V
     rm -rf /tmp/velero-tar.gz velero-v${VELERO_VERSION}-${TARGETOS}-${TARGETARCH}
 
 RUN curl -L -o /tmp/vault.zip \
-    https://releases.hashicorp.com/vault/1.9.3/vault_1.9.3_${TARGETOS}_${TARGETARCH}.zip && \
+    https://releases.hashicorp.com/vault/1.11.0/vault_1.11.0_${TARGETOS}_${TARGETARCH}.zip && \
     cd /tmp && unzip vault.zip && mv vault /usr/bin/ && \
     rm -rf /tmp/vault.zip
+
+RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/
+
+RUN curl -o /tmp/helm.tar.gz \
+      https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz && \
+    tar -C /tmp -xvf /tmp/helm.tar.gz && \
+    mv /tmp/linux-${TARGETARCH}/helm /usr/local/bin/helm && \
+    rm -rf /tmp/linux-${TARGETARCH} && rm -rf /tmp/helm.tar.gz
 
 # overrite install-plugins to limit concurrent downloads
 COPY scripts/install-plugins.sh /usr/local/bin/install-plugins.sh
