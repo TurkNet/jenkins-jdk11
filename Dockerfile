@@ -2,8 +2,8 @@
 FROM jenkins/jenkins:2.387.3-lts-jdk11
 
 # https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
-ARG TARGETARCH=amd64
-ARG TARGETOS=linux
+ARG TARGETARCH
+ARG TARGETOS
 
 ENV VELERO_VERSION=1.7.0
 ENV HELM_VERSION=v3.10.3
