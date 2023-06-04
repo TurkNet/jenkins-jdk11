@@ -1,9 +1,9 @@
 # lts with jdk8, starting with 2.303 jdk11 is the default
-FROM jenkins/jenkins:2.375.3-lts-jdk11
+FROM jenkins/jenkins:2.387.3-lts-jdk11
 
 # https://docs.docker.com/engine/reference/builder/#automatic-platform-args-in-the-global-scope
-ARG TARGETARCH
-ARG TARGETOS
+ARG TARGETARCH=amd64
+ARG TARGETOS=linux
 
 ENV VELERO_VERSION=1.7.0
 ENV HELM_VERSION=v3.10.3
@@ -50,6 +50,8 @@ RUN curl -o /tmp/helm.tar.gz \
 
 # overrite install-plugins to limit concurrent downloads
 COPY scripts/install-plugins.sh /usr/local/bin/install-plugins.sh
+
+#EXPOSE 8080
 
 # move jenkins-plugin-cli binary in order to use the old plugin download strategy
 RUN mv /bin/jenkins-plugin-cli /bin/jenkins-plugin-cli-moved
