@@ -48,7 +48,7 @@ jobs:
 
       - name: Get Dockerfile FROM value
         run: |
-          FROM_VALUE=$(grep -m 1 '^FROM' ./Dockerfile | awk -F '/' '{print $2}')
+          FROM_VALUE=$(grep -m 1 '^FROM' ./Dockerfile | awk -F ':' '{print $2}')
           echo "FROM_VALUE=$FROM_VALUE" >> $GITHUB_ENV
           
       # https://github.com/docker/build-push-action
