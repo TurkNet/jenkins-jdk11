@@ -23,7 +23,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run Script
-        run: bash ../../get_latest_lts_jdk11_tag.sh
+        run: bash get_latest_lts_jdk11_tag.sh
         
       # https://github.com/docker/setup-qemu-action
       - name: Set up QEMU
