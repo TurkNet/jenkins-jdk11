@@ -1,0 +1,24 @@
+name: Scheduled Script Execution
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run script
+        run: |
+          bash get_latest_lts_jdk11_tag.sh
+      
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "seda_yilmaz1"
+          git config --global user.email "seda.yilmaz@turk.net"
+          git commit -am "Update Dockerfile with latest tag"
+          git push
