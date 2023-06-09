@@ -2,7 +2,7 @@ name: Scheduled Script Execution
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "*/10 * * * *"
 
 jobs:
   run-script:
@@ -13,10 +13,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run script
+        id: run-script
         run: |
           bash get_latest_lts_jdk11_tag.sh
+          echo "::set-output name=tag_changed::$(git diff --name-only)"
       
       - name: Commit and push changes
+        if: steps.run-script.outputs.tag_changed == 'Dockerfile'
         run: |
           git config --global user.name "seda_yilmaz1"
           git config --global user.email "seda.yilmaz@turk.net"
